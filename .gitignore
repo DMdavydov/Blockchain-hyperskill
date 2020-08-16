@@ -1,0 +1,9 @@
+# Project exclude paths
+/.gradle/
+/Blockchain/task/build/
+/Blockchain/task/out/
+/Blockchain/task/out/production/classes/
+/Problems/Rehashing/out/
+/Problems/Rehashing/out/production/classes/
+/Problems/Seconds between two time points/out/
+/Problems/Seconds between two time points/out/production/classes/
