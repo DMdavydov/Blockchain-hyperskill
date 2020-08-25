@@ -26,10 +26,6 @@ topics:
     theory_id: 7929
   - title: Computer algorithms
     theory_id: 4953
-  - title: Pseudocode basics
-    theory_id: 8228
-  - title: Complex constructions in pseudocode
-    theory_id: 8233
   - title: Introducing the first algorithm
     theory_id: 10336
   - title: The big O notation
@@ -255,8 +251,6 @@ topics:
     theory_id: 3581
   - title: Set
     theory_id: 3575
-  - title: Map
-    theory_id: 3558
   - title: Method references
     theory_id: 3620
   - title: Standard functional interfaces
@@ -285,3 +279,5 @@ topics:
     theory_id: 8419
   - title: Infinite streams
     theory_id: 10180
+  - title: Grouping collectors
+    theory_id: 10512
