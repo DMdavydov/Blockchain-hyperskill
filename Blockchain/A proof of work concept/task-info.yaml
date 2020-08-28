@@ -244,34 +244,6 @@ files:
         }
     }
   learner_created: false
-- name: src/blockchain/StringUtil.java
-  visible: true
-  text: |
-    package blockchain;
-
-    import java.security.MessageDigest;
-
-    public class StringUtil {
-        public static String applySha256(String input){
-            try {
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                /* Applies sha256 to our input */
-                byte[] hash = digest.digest(input.getBytes("UTF-8"));
-                StringBuilder hexString = new StringBuilder();
-                for (byte elem: hash) {
-                    String hex = Integer.toHexString(0xff & elem);
-                    if(hex.length() == 1) hexString.append('0');
-                    hexString.append(hex);
-                }
-                return hexString.toString();
-            }
-            catch(Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-  learner_created: true
 - name: src/blockchain/Block.java
   visible: true
   text: |
@@ -319,20 +291,47 @@ files:
         }
     }
   learner_created: true
+- name: src/blockchain/util/SerializationUtils.java
+  visible: true
+  learner_created: true
+- name: src/blockchain/util/StringUtils.java
+  visible: true
+  text: |
+    package blockchain;
+
+    import java.security.MessageDigest;
+
+    public class StringUtil {
+        public static String applySha256(String input){
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                /* Applies sha256 to our input */
+                byte[] hash = digest.digest(input.getBytes("UTF-8"));
+                StringBuilder hexString = new StringBuilder();
+                for (byte elem: hash) {
+                    String hex = Integer.toHexString(0xff & elem);
+                    if(hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                return hexString.toString();
+            }
+            catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+  learner_created: true
+- name: src/blockchain/Blockchain.java
+  visible: true
+  learner_created: true
+- name: tamechain.data
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/50/stages/272/implement
-status: Failed
+status: Solved
 feedback:
-  message: "Wrong answer in test #1\n\nEvery block should contain 9 lines of data\n\
-    \nPlease find below the output of your program during this failed test.\n\n---\n\
-    \n[\nBlock: \nId: 1\nTimestamp: 1597576731907\nHash of the previous block: \n\
-    0\nHash of the block: \nd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35,\
-    \ \nBlock: \nId: 2\nTimestamp: 1597576731911\nHash of the previous block: \nd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35\n\
-    Hash of the block: \n4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce,\
-    \ \nBlock: \nId: 3\nTimestamp: 1597576731912\nHash of the previous block: \n4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce\n\
-    Hash of the block: \n4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a,\
-    \ \nBlock: \nId: 4\nTimestamp: 1597576731913\nHash of the previous block: \n4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a\n\
-    Hash of the block: \nef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d,\
-    \ \nBlock: \nId: 5\nTimestamp: 1597576731913\nHash of the previous block: \nef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d\n\
-    Hash of the block: \ne7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683]"
-  time: Sun, 16 Aug 2020 11:18:52 UTC
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/50/stages/272/implement">JetBrains
+    Academy</a>
+  time: Fri, 28 Aug 2020 13:15:29 UTC
 record: -1

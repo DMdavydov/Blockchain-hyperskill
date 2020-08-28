@@ -1,8 +1,8 @@
-package blockchain;
+package blockchain.util;
 
 import java.security.MessageDigest;
 
-public class StringUtil {
+public class StringUtils {
     public static String applySha256(String input){
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

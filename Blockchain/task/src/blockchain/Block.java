@@ -1,43 +1,71 @@
 package blockchain;
 
+import blockchain.util.StringUtils;
+
+import java.io.Serializable;
 import java.util.Date;
+import java.util.Random;
 
-public class Block {
-
-    private int id;
-    private long timeStamp;
-    private String previousHash;
+public class Block implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private final long id;
+    private final long timeStamp;
+    private final String prevHash;
+    private final long generatingTime;
     private String hash;
+    private int magicNum;
 
-    public Block(int id, String hash, String previousHash) {
-        this.id = id;
+    private Block(Block prev, int proof) {
         this.timeStamp = new Date().getTime();
-        this.previousHash = previousHash;
-        this.hash = StringUtil.applySha256(hash);
+        if (prev == null) {
+            this.id = 1;
+            this.prevHash = "0";
+        } else {
+            this.id = prev.getId() + 1;
+            this.prevHash = prev.getHash();
+        }
+        this.hash = generateHash(proof);
+        generatingTime = new Date().getTime() - timeStamp;
     }
 
-    public int getId() {
-        return id;
+    private String generateHash(int proof) {
+        String zeros = "0".repeat(proof);
+        Random random = new Random(34564);
+        int magic;
+        String hash;
+        do {
+            magic = random.nextInt(1000000);
+            hash = StringUtils.applySha256(+ timeStamp + String.valueOf(id) + String.valueOf(magic)  + prevHash);
+        } while (!hash.startsWith(zeros));
+        magicNum = magic;
+        this.hash = hash;
+        return hash;
     }
 
-    public long getTimeStamp() {
-        return timeStamp;
-    }
-
-    public String getPreviousHash() {
-        return previousHash;
+    public static Block getInstance(Block prev, int proof) {
+        return new Block(prev, proof);
     }
 
     public String getHash() {
-        return hash;
+        return this.hash;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getPrevHash() {
+        return prevHash;
     }
 
     @Override
     public String toString() {
-        return  "\n" + "Block: " + "\n" +
-                "Id: " + id + "\n" +
-                "Timestamp: " + timeStamp + "\n" +
-                "Hash of the previous block: " + "\n" + previousHash + "\n" +
-                "Hash of the block: " + "\n" + hash;
+        return "Block:" +
+                "\nId: " + id +
+                "\nTimestamp: " + timeStamp +
+                "\nMagic number: " + magicNum +
+                "\nHash of the previous block:\n" + prevHash +
+                "\nHash of the block:\n" + getHash() +
+                "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
     }
 }

@@ -28,3 +28,5 @@ content:
 - Convert to bytes
 - Reverse input text
 - Count words
+- Serializable user
+- The Range class
