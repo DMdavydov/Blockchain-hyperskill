@@ -42,3 +42,8 @@ content:
 - VeganPizza
 - Ordering the execution of threads
 - Summing with threads
+- Multithreaded counter
+- Countdown counter
+- Thread-safe account
+- Messaging
+- Check whether a number is prime
