@@ -15,9 +15,11 @@
             <option value="$PROJECT_DIR$/Problems/10 days before" />
             <option value="$PROJECT_DIR$/Problems/30 years before and after" />
             <option value="$PROJECT_DIR$/Problems/Add 11 hours and print the date" />
+            <option value="$PROJECT_DIR$/Problems/Breakfast Decorator" />
             <option value="$PROJECT_DIR$/Problems/Burgers" />
             <option value="$PROJECT_DIR$/Problems/Check whether a number is prime" />
             <option value="$PROJECT_DIR$/Problems/Clock factory" />
+            <option value="$PROJECT_DIR$/Problems/Coffee Decorator" />
             <option value="$PROJECT_DIR$/Problems/Complete a class" />
             <option value="$PROJECT_DIR$/Problems/Complete the eager singleton" />
             <option value="$PROJECT_DIR$/Problems/Convert to byte array" />
@@ -39,6 +41,7 @@
             <option value="$PROJECT_DIR$/Problems/Ordering the execution of threads" />
             <option value="$PROJECT_DIR$/Problems/Phone Book" />
             <option value="$PROJECT_DIR$/Problems/Phone factory" />
+            <option value="$PROJECT_DIR$/Problems/Pizza Decorator" />
             <option value="$PROJECT_DIR$/Problems/Rehashing" />
             <option value="$PROJECT_DIR$/Problems/Remote Controller" />
             <option value="$PROJECT_DIR$/Problems/Removing" />
