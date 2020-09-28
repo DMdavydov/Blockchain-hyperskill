@@ -323,6 +323,13 @@ files:
         }
     }
   learner_created: false
+- name: src/blockchain/Miner.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/50/stages/273/implement
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/50/stages/273/implement">JetBrains
+    Academy</a>
+  time: Mon, 28 Sep 2020 07:27:26 UTC
 record: -1

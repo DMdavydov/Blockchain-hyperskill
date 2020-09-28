@@ -38,7 +38,6 @@ public class Block implements Serializable {
             hash = StringUtils.applySha256(+ timeStamp + String.valueOf(id) + String.valueOf(magic)  + prevHash);
         } while (!hash.startsWith(zeros));
         magicNum = magic;
-        this.hash = hash;
         return hash;
     }
 
@@ -58,14 +57,18 @@ public class Block implements Serializable {
         return prevHash;
     }
 
+    public long getGeneratingTime() {
+        return generatingTime;
+    }
+
     @Override
     public String toString() {
-        return "Block:" +
-                "\nId: " + id +
-                "\nTimestamp: " + timeStamp +
-                "\nMagic number: " + magicNum +
-                "\nHash of the previous block:\n" + prevHash +
-                "\nHash of the block:\n" + getHash() +
-                "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
+        return //"Block:" +
+                "Id: " + id +
+                        "\nTimestamp: " + timeStamp +
+                        "\nMagic number: " + magicNum +
+                        "\nHash of the previous block:\n" + prevHash +
+                        "\nHash of the block:\n" + getHash() +
+                        "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
     }
 }
