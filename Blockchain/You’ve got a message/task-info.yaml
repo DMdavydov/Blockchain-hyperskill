@@ -244,6 +244,342 @@ files:
         }
     }
   learner_created: false
+- name: src/blockchain/Blockchain.java
+  visible: true
+  text: |-
+    package blockchain;
+
+    import blockchain.util.SerializationUtils;
+
+    import java.io.File;
+    import java.io.IOException;
+    import java.io.Serializable;
+    import java.util.ArrayList;
+    import java.util.Objects;
+
+    public class Blockchain implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private static Blockchain blockchain;
+
+        private int zeroNumbers;
+
+        private final ArrayList<Block> chain;
+
+        private Blockchain() {
+            this.zeroNumbers = 0;
+            this.chain = new ArrayList<>();
+        }
+
+        public static Blockchain getBlockchain(String filename) {
+            if (blockchain != null) {
+                return blockchain;
+            }
+
+            File file = new File(filename);
+            //System.out.println(file.getAbsolutePath());
+            if (file.exists() && file.length() != 0) {
+                try {
+                    blockchain = (Blockchain) SerializationUtils.deserialize(file.getName());
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                blockchain = new Blockchain();
+            }
+            return blockchain;
+        }
+
+        public Block getBlock(int id) {
+            if (id < chain.size()) {
+                return chain.get(id);
+            }
+            throw new IllegalArgumentException("There is no such block");
+        }
+
+        public synchronized Block peek() {
+            if (chain == null || chain.isEmpty()){
+                return null;
+            }
+            return chain.get(chain.size() - 1);
+        }
+
+        public synchronized int getZeroNumbers() {
+            return zeroNumbers;
+        }
+
+        public synchronized boolean put(Block newBlock, String miner) {
+            String prevHash = chain.isEmpty() ? "0" : chain.get(chain.size() - 1).getHash();
+            if (prevHash == newBlock.getPrevHash()) {
+                chain.add(newBlock);
+                System.out.println("Block:");
+                System.out.println("Created by miner # " + miner);
+                System.out.println(newBlock);
+                if (newBlock.getGeneratingTime() / 1000 < 60) {
+                    System.out.println(zeroNumbers++ + " was increased to 1\n");
+                } else {
+                    System.out.println(zeroNumbers-- + " was decreased to 1\n");
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public int getSize() {
+            return chain.size();
+        }
+
+        public boolean validate() {
+            for (int i = 1; i < chain.size(); i++) {
+                if (Objects.equals(chain.get(i).getPrevHash(), chain.get(i - 1).getHash())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+  learner_created: true
+- name: src/blockchain/Miner.java
+  visible: true
+  text: |
+    package blockchain;
+
+    public class Miner implements Runnable {
+        private Blockchain chain;
+        private String miner;
+
+        public Miner(Blockchain chain) {
+            this.chain = chain;
+        }
+
+        private Block generateBlock() {
+            int proof = chain.getZeroNumbers();
+            Block newBlock;
+            Block prevBlock = chain.peek();
+            newBlock = Block.getInstance(prevBlock, proof);
+            chain.put(newBlock, miner);
+            return newBlock;
+        }
+
+        @Override
+        public void run() {
+            String[] s = Thread.currentThread().getName().split("-");
+            this.miner = s[s.length - 1];
+            generateBlock();
+        }
+    }
+  learner_created: true
+- name: src/blockchain/util/StringUtils.java
+  visible: true
+  text: |
+    package blockchain.util;
+
+    import java.security.MessageDigest;
+
+    public class StringUtils {
+        public static String applySha256(String input){
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                /* Applies sha256 to our input */
+                byte[] hash = digest.digest(input.getBytes("UTF-8"));
+                StringBuilder hexString = new StringBuilder();
+                for (byte elem: hash) {
+                    String hex = Integer.toHexString(0xff & elem);
+                    if(hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                return hexString.toString();
+            }
+            catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+  learner_created: true
+- name: src/blockchain/util/SerializationUtils.java
+  visible: true
+  text: |
+    package blockchain.util;
+
+    import java.io.BufferedInputStream;
+    import java.io.BufferedOutputStream;
+    import java.io.FileInputStream;
+    import java.io.FileOutputStream;
+    import java.io.IOException;
+    import java.io.ObjectInputStream;
+    import java.io.ObjectOutputStream;
+
+    public class SerializationUtils {
+        public static void serialize(Object obj, String fileName) throws IOException {
+            FileOutputStream fos = new FileOutputStream(fileName);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.close();
+        }
+
+        /**
+         * Deserialize to an object from the file
+         */
+        public static Object deserialize(String fileName) throws IOException, ClassNotFoundException {
+            FileInputStream fis = new FileInputStream(fileName);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            Object obj = ois.readObject();
+            ois.close();
+            return obj;
+        }
+    }
+  learner_created: true
+- name: src/blockchain/Block.java
+  visible: true
+  text: |-
+    package blockchain;
+
+    import blockchain.util.StringUtils;
+
+    import java.io.Serializable;
+    import java.util.Date;
+    import java.util.Random;
+
+    public class Block implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final long id;
+        private final long timeStamp;
+        private final String prevHash;
+        private final long generatingTime;
+        private String hash;
+        private int magicNum;
+
+        private Block(Block prev, int proof) {
+            this.timeStamp = new Date().getTime();
+            if (prev == null) {
+                this.id = 1;
+                this.prevHash = "0";
+            } else {
+                this.id = prev.getId() + 1;
+                this.prevHash = prev.getHash();
+            }
+            this.hash = generateHash(proof);
+            generatingTime = new Date().getTime() - timeStamp;
+        }
+
+        private String generateHash(int proof) {
+            String zeros = "0".repeat(proof);
+            Random random = new Random(34564);
+            int magic;
+            String hash;
+            do {
+                magic = random.nextInt(1000000);
+                hash = StringUtils.applySha256(+ timeStamp + String.valueOf(id) + String.valueOf(magic)  + prevHash);
+            } while (!hash.startsWith(zeros));
+            magicNum = magic;
+            return hash;
+        }
+
+        public static Block getInstance(Block prev, int proof) {
+            return new Block(prev, proof);
+        }
+
+        public String getHash() {
+            return this.hash;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getPrevHash() {
+            return prevHash;
+        }
+
+        public long getGeneratingTime() {
+            return generatingTime;
+        }
+
+        @Override
+        public String toString() {
+            return //"Block:" +
+                    "Id: " + id +
+                            "\nTimestamp: " + timeStamp +
+                            "\nMagic number: " + magicNum +
+                            "\nHash of the previous block:\n" + prevHash +
+                            "\nHash of the block:\n" + getHash() +
+                            "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
+        }
+    }
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/50/stages/274/implement
-status: Unchecked
+status: Failed
+feedback:
+  message: |-
+    Wrong answer in test #1
+
+    Every block should contain at least 12 lines of data
+
+    Please find below the output of your program during this failed test.
+
+    ---
+
+    Block:
+    Created by miner # 1
+    Id: 1
+    Timestamp: 1601371434374
+    Magic number: 457530
+    Hash of the previous block:
+    0
+    Hash of the block:
+    81029f2f3ccf58f49c19bbc5eee7bc388c942ec13bbb6e83fd90a8a52b69b597
+    Block was generating for 0.014 seconds
+    0 was increased to 1
+
+    Block:
+    Created by miner # 2
+    Id: 2
+    Timestamp: 1601371435385
+    Magic number: 159630
+    Hash of the previous block:
+    81029f2f3ccf58f49c19bbc5eee7bc388c942ec13bbb6e83fd90a8a52b69b597
+    Hash of the block:
+    05f240ca1db5b7d2ac4a2079f88bb57947bb95d5a280f2fe70ddbc5c83100196
+    Block was generating for 0.0 seconds
+    1 was increased to 1
+
+    Block:
+    Created by miner # 3
+    Id: 3
+    Timestamp: 1601371436395
+    Magic number: 440906
+    Hash of the previous block:
+    05f240ca1db5b7d2ac4a2079f88bb57947bb95d5a280f2fe70ddbc5c83100196
+    Hash of the block:
+    002f58971f8c7bb8618f2c408412c349171f6541f94ddf70804e8c9902b162b0
+    Block was generating for 0.01 seconds
+    2 was increased to 1
+
+    Block:
+    Created by miner # 4
+    Id: 4
+    Timestamp: 1601371437405
+    Magic number: 594141
+    Hash of the previous block:
+    002f58971f8c7bb8618f2c408412c349171f6541f94ddf70804e8c9902b162b0
+    Hash of the block:
+    0006255caccce44ddb0654dec538dc05593b70ccd578e645bcc5cfe857c0e8db
+    Block was generating for 0.006 seconds
+    3 was increased to 1
+
+    Block:
+    Created by miner # 1
+    Id: 5
+    Timestamp: 1601371438420
+    Magic number: 144307
+    Hash of the previous block:
+    0006255caccce44ddb0654dec538dc05593b70ccd578e645bcc5cfe857c0e8db
+    Hash of the block:
+    0000b8c8fa9ab6026058bf6c45a567cd026a2ac8fdc3a42677d15a3252351333
+    Block was generating for 0.16 seconds
+    4 was increased to 1
+  time: Tue, 29 Sep 2020 09:23:59 UTC
 record: -1

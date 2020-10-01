@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     private static class TableEntry<T> {
         private final int key;
@@ -30,50 +27,19 @@ public class Main {
         }
 
         public boolean put(int key, T value) {
-            int idx = findKey(key);
-
-            if (idx == -1) {
-                return false;
-            }
-
-            table[idx] = new TableEntry(key, value);
-            return true;
+            // put your code here
         }
 
         public T get(int key) {
-            int idx = findKey(key);
-
-            if (idx == -1 || table[idx] == null) {
-                return null;
-            }
-
-            return (T) table[idx].getValue();
+            // put your code here          
         }
 
-        public List<TableEntry<T>> entrySet() {
-            List<TableEntry<T>> list = new ArrayList<>();
-
-            for (TableEntry entry : table) {
-                if (entry != null) {
-                    list.add(entry);
-                }
-            }
-
-            return list;
+        public ??? entrySet() {
+            // put your code here
         }
 
         private int findKey(int key) {
-            int hash = key % size;
-
-            while (table[hash] != null && table[hash].getKey() != key) {
-                hash = (hash + 1) % size;
-
-                if (hash == key % size) {
-                    return -1;
-                }
-            }
-
-            return hash;
+            // put your code here
         }
 
         private void rehash() {
