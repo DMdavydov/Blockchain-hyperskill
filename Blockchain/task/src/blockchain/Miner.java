@@ -1,26 +1,27 @@
 package blockchain;
 
-public class Miner implements Runnable {
-    private Blockchain chain;
-    private String miner;
+import java.util.List;
+import java.util.function.Supplier;
+public class Miner {
+    private final int id;
+    private final Supplier<Block> blockSupplier;
+    private Block block;
 
-    public Miner(Blockchain chain) {
-        this.chain = chain;
+    public Miner(int id, Block previousBlock, int zeros, List<String> messages) {
+        this.id = id;
+        this.blockSupplier = () -> new Block(previousBlock, zeros, messages);
     }
 
-    private Block generateBlock() {
-        int proof = chain.getZeroNumbers();
-        Block newBlock;
-        Block prevBlock = chain.peek();
-        newBlock = Block.getInstance(prevBlock, proof);
-        chain.put(newBlock, miner);
-        return newBlock;
+    public Miner mine() {
+        block = blockSupplier.get();
+        return this;
     }
 
-    @Override
-    public void run() {
-        String[] s = Thread.currentThread().getName().split("-");
-        this.miner = s[s.length - 1];
-        generateBlock();
+    public Block getBlock() {
+        return block;
+    }
+
+    public int getId() {
+        return id;
     }
 }

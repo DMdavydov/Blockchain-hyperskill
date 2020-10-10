@@ -244,101 +244,6 @@ files:
         }
     }
   learner_created: false
-- name: src/blockchain/Blockchain.java
-  visible: true
-  text: |-
-    package blockchain;
-
-    import blockchain.util.SerializationUtils;
-
-    import java.io.File;
-    import java.io.IOException;
-    import java.io.Serializable;
-    import java.util.ArrayList;
-    import java.util.Objects;
-
-    public class Blockchain implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private static Blockchain blockchain;
-
-        private int zeroNumbers;
-
-        private final ArrayList<Block> chain;
-
-        private Blockchain() {
-            this.zeroNumbers = 0;
-            this.chain = new ArrayList<>();
-        }
-
-        public static Blockchain getBlockchain(String filename) {
-            if (blockchain != null) {
-                return blockchain;
-            }
-
-            File file = new File(filename);
-            //System.out.println(file.getAbsolutePath());
-            if (file.exists() && file.length() != 0) {
-                try {
-                    blockchain = (Blockchain) SerializationUtils.deserialize(file.getName());
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                blockchain = new Blockchain();
-            }
-            return blockchain;
-        }
-
-        public Block getBlock(int id) {
-            if (id < chain.size()) {
-                return chain.get(id);
-            }
-            throw new IllegalArgumentException("There is no such block");
-        }
-
-        public synchronized Block peek() {
-            if (chain == null || chain.isEmpty()){
-                return null;
-            }
-            return chain.get(chain.size() - 1);
-        }
-
-        public synchronized int getZeroNumbers() {
-            return zeroNumbers;
-        }
-
-        public synchronized boolean put(Block newBlock, String miner) {
-            String prevHash = chain.isEmpty() ? "0" : chain.get(chain.size() - 1).getHash();
-            if (prevHash == newBlock.getPrevHash()) {
-                chain.add(newBlock);
-                System.out.println("Block:");
-                System.out.println("Created by miner # " + miner);
-                System.out.println(newBlock);
-                if (newBlock.getGeneratingTime() / 1000 < 60) {
-                    System.out.println(zeroNumbers++ + " was increased to 1\n");
-                } else {
-                    System.out.println(zeroNumbers-- + " was decreased to 1\n");
-                }
-                return true;
-            }
-            return false;
-        }
-
-        public int getSize() {
-            return chain.size();
-        }
-
-        public boolean validate() {
-            for (int i = 1; i < chain.size(); i++) {
-                if (Objects.equals(chain.get(i).getPrevHash(), chain.get(i - 1).getHash())) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-  learner_created: true
 - name: src/blockchain/Miner.java
   visible: true
   text: |
@@ -510,76 +415,13 @@ files:
         }
     }
   learner_created: true
+- name: src/blockchain/ParallelExecutor.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/50/stages/274/implement
-status: Failed
+status: Solved
 feedback:
-  message: |-
-    Wrong answer in test #1
-
-    Every block should contain at least 12 lines of data
-
-    Please find below the output of your program during this failed test.
-
-    ---
-
-    Block:
-    Created by miner # 1
-    Id: 1
-    Timestamp: 1601371434374
-    Magic number: 457530
-    Hash of the previous block:
-    0
-    Hash of the block:
-    81029f2f3ccf58f49c19bbc5eee7bc388c942ec13bbb6e83fd90a8a52b69b597
-    Block was generating for 0.014 seconds
-    0 was increased to 1
-
-    Block:
-    Created by miner # 2
-    Id: 2
-    Timestamp: 1601371435385
-    Magic number: 159630
-    Hash of the previous block:
-    81029f2f3ccf58f49c19bbc5eee7bc388c942ec13bbb6e83fd90a8a52b69b597
-    Hash of the block:
-    05f240ca1db5b7d2ac4a2079f88bb57947bb95d5a280f2fe70ddbc5c83100196
-    Block was generating for 0.0 seconds
-    1 was increased to 1
-
-    Block:
-    Created by miner # 3
-    Id: 3
-    Timestamp: 1601371436395
-    Magic number: 440906
-    Hash of the previous block:
-    05f240ca1db5b7d2ac4a2079f88bb57947bb95d5a280f2fe70ddbc5c83100196
-    Hash of the block:
-    002f58971f8c7bb8618f2c408412c349171f6541f94ddf70804e8c9902b162b0
-    Block was generating for 0.01 seconds
-    2 was increased to 1
-
-    Block:
-    Created by miner # 4
-    Id: 4
-    Timestamp: 1601371437405
-    Magic number: 594141
-    Hash of the previous block:
-    002f58971f8c7bb8618f2c408412c349171f6541f94ddf70804e8c9902b162b0
-    Hash of the block:
-    0006255caccce44ddb0654dec538dc05593b70ccd578e645bcc5cfe857c0e8db
-    Block was generating for 0.006 seconds
-    3 was increased to 1
-
-    Block:
-    Created by miner # 1
-    Id: 5
-    Timestamp: 1601371438420
-    Magic number: 144307
-    Hash of the previous block:
-    0006255caccce44ddb0654dec538dc05593b70ccd578e645bcc5cfe857c0e8db
-    Hash of the block:
-    0000b8c8fa9ab6026058bf6c45a567cd026a2ac8fdc3a42677d15a3252351333
-    Block was generating for 0.16 seconds
-    4 was increased to 1
-  time: Tue, 29 Sep 2020 09:23:59 UTC
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/50/stages/274/implement">JetBrains
+    Academy</a>
+  time: Sat, 10 Oct 2020 13:10:43 UTC
 record: -1

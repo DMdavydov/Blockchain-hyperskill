@@ -2,73 +2,75 @@ package blockchain;
 
 import blockchain.util.StringUtils;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.Random;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
-public class Block implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private final long id;
-    private final long timeStamp;
-    private final String prevHash;
-    private final long generatingTime;
-    private String hash;
-    private int magicNum;
+public class Block {
+    private final String previousHash;
+    private final String hash;
+    private final long timestamp;
+    private final int uid;
+    private final int magicNumber;
+    private final int miningDuration;
+    private final String message;
 
-    private Block(Block prev, int proof) {
-        this.timeStamp = new Date().getTime();
-        if (prev == null) {
-            this.id = 1;
-            this.prevHash = "0";
-        } else {
-            this.id = prev.getId() + 1;
-            this.prevHash = prev.getHash();
-        }
-        this.hash = generateHash(proof);
-        generatingTime = new Date().getTime() - timeStamp;
-    }
+    public Block(Block previous, int zeros, List<String> messages) {
+        previousHash = previous == null ? "0" : previous.hash;
+        timestamp = new Date().getTime();
+        uid = previous == null ? 0 : previous.uid + 1;
+        message = messages.isEmpty() ? null : messages.stream().collect(Collectors.joining(System.lineSeparator()));
 
-    private String generateHash(int proof) {
-        String zeros = "0".repeat(proof);
-        Random random = new Random(34564);
-        int magic;
-        String hash;
+        String hashProbe;
+        int magicNumberProbe;
+
+        long timer = System.currentTimeMillis();
         do {
-            magic = random.nextInt(1000000);
-            hash = StringUtils.applySha256(+ timeStamp + String.valueOf(id) + String.valueOf(magic)  + prevHash);
-        } while (!hash.startsWith(zeros));
-        magicNum = magic;
-        return hash;
+            if (Thread.currentThread().isInterrupted()) throw new RuntimeException(new InterruptedException());
+
+            magicNumberProbe = randomInt();
+            hashProbe = StringUtils.applySha256(serialize(uid, timestamp, magicNumberProbe, previousHash, message));
+        } while (!hashProbe.startsWith("0".repeat(zeros)));
+        miningDuration = (int) ((System.currentTimeMillis() - timer) / 1000);
+
+        magicNumber = magicNumberProbe;
+        hash = hashProbe;
     }
 
-    public static Block getInstance(Block prev, int proof) {
-        return new Block(prev, proof);
+    private int randomInt() {
+        return ThreadLocalRandom.current().nextInt();
+    }
+
+    private String serialize(int uid, long timestamp, int magicNumber, String previousHash, String message) {
+        return String.format("%d-%d-%d-%s-%s", uid, timestamp, magicNumber, previousHash, message);
+    }
+
+    public String getPreviousHash() {
+        return previousHash;
     }
 
     public String getHash() {
-        return this.hash;
+        return hash;
     }
 
-    public long getId() {
-        return id;
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public String getPrevHash() {
-        return prevHash;
+    public int getUid() {
+        return uid;
     }
 
-    public long getGeneratingTime() {
-        return generatingTime;
+    public int getMagicNumber() {
+        return magicNumber;
     }
 
-    @Override
-    public String toString() {
-        return //"Block:" +
-                "Id: " + id +
-                        "\nTimestamp: " + timeStamp +
-                        "\nMagic number: " + magicNum +
-                        "\nHash of the previous block:\n" + prevHash +
-                        "\nHash of the block:\n" + getHash() +
-                        "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
+    public int getMiningDuration() {
+        return miningDuration;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

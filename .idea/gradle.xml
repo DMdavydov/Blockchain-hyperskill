@@ -37,6 +37,7 @@
             <option value="$PROJECT_DIR$/Problems/Count words" />
             <option value="$PROJECT_DIR$/Problems/Count words without repetitions" />
             <option value="$PROJECT_DIR$/Problems/Countdown counter" />
+            <option value="$PROJECT_DIR$/Problems/Counting clicks" />
             <option value="$PROJECT_DIR$/Problems/Disjunct all" />
             <option value="$PROJECT_DIR$/Problems/Filtering the list" />
             <option value="$PROJECT_DIR$/Problems/Find all mondays" />
@@ -80,6 +81,7 @@
             <option value="$PROJECT_DIR$/Problems/The Range class" />
             <option value="$PROJECT_DIR$/Problems/The address book" />
             <option value="$PROJECT_DIR$/Problems/The passed hours since the beginning of year" />
+            <option value="$PROJECT_DIR$/Problems/The total sum of transaction by each account" />
             <option value="$PROJECT_DIR$/Problems/Thread-safe account" />
             <option value="$PROJECT_DIR$/Problems/Undo command" />
             <option value="$PROJECT_DIR$/Problems/VeganPizza" />
