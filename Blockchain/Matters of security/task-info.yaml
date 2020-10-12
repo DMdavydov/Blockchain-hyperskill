@@ -244,6 +244,184 @@ files:
         }
     }
   learner_created: false
+- name: src/blockchain/ParallelExecutor.java
+  visible: true
+  learner_created: true
+- name: src/blockchain/Miner.java
+  visible: true
+  text: |
+    package blockchain;
+
+    public class Miner implements Runnable {
+        private Blockchain chain;
+        private String miner;
+
+        public Miner(Blockchain chain) {
+            this.chain = chain;
+        }
+
+        private Block generateBlock() {
+            int proof = chain.getZeroNumbers();
+            Block newBlock;
+            Block prevBlock = chain.peek();
+            newBlock = Block.getInstance(prevBlock, proof);
+            chain.put(newBlock, miner);
+            return newBlock;
+        }
+
+        @Override
+        public void run() {
+            String[] s = Thread.currentThread().getName().split("-");
+            this.miner = s[s.length - 1];
+            generateBlock();
+        }
+    }
+  learner_created: true
+- name: src/blockchain/util/StringUtils.java
+  visible: true
+  text: |
+    package blockchain.util;
+
+    import java.security.MessageDigest;
+
+    public class StringUtils {
+        public static String applySha256(String input){
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                /* Applies sha256 to our input */
+                byte[] hash = digest.digest(input.getBytes("UTF-8"));
+                StringBuilder hexString = new StringBuilder();
+                for (byte elem: hash) {
+                    String hex = Integer.toHexString(0xff & elem);
+                    if(hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                return hexString.toString();
+            }
+            catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+  learner_created: true
+- name: src/blockchain/util/SerializationUtils.java
+  visible: true
+  text: |
+    package blockchain.util;
+
+    import java.io.BufferedInputStream;
+    import java.io.BufferedOutputStream;
+    import java.io.FileInputStream;
+    import java.io.FileOutputStream;
+    import java.io.IOException;
+    import java.io.ObjectInputStream;
+    import java.io.ObjectOutputStream;
+
+    public class SerializationUtils {
+        public static void serialize(Object obj, String fileName) throws IOException {
+            FileOutputStream fos = new FileOutputStream(fileName);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.close();
+        }
+
+        /**
+         * Deserialize to an object from the file
+         */
+        public static Object deserialize(String fileName) throws IOException, ClassNotFoundException {
+            FileInputStream fis = new FileInputStream(fileName);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            Object obj = ois.readObject();
+            ois.close();
+            return obj;
+        }
+    }
+  learner_created: true
+- name: src/blockchain/Block.java
+  visible: true
+  text: |-
+    package blockchain;
+
+    import blockchain.util.StringUtils;
+
+    import java.io.Serializable;
+    import java.util.Date;
+    import java.util.Random;
+
+    public class Block implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final long id;
+        private final long timeStamp;
+        private final String prevHash;
+        private final long generatingTime;
+        private String hash;
+        private int magicNum;
+
+        private Block(Block prev, int proof) {
+            this.timeStamp = new Date().getTime();
+            if (prev == null) {
+                this.id = 1;
+                this.prevHash = "0";
+            } else {
+                this.id = prev.getId() + 1;
+                this.prevHash = prev.getHash();
+            }
+            this.hash = generateHash(proof);
+            generatingTime = new Date().getTime() - timeStamp;
+        }
+
+        private String generateHash(int proof) {
+            String zeros = "0".repeat(proof);
+            Random random = new Random(34564);
+            int magic;
+            String hash;
+            do {
+                magic = random.nextInt(1000000);
+                hash = StringUtils.applySha256(+ timeStamp + String.valueOf(id) + String.valueOf(magic)  + prevHash);
+            } while (!hash.startsWith(zeros));
+            magicNum = magic;
+            return hash;
+        }
+
+        public static Block getInstance(Block prev, int proof) {
+            return new Block(prev, proof);
+        }
+
+        public String getHash() {
+            return this.hash;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getPrevHash() {
+            return prevHash;
+        }
+
+        public long getGeneratingTime() {
+            return generatingTime;
+        }
+
+        @Override
+        public String toString() {
+            return //"Block:" +
+                    "Id: " + id +
+                            "\nTimestamp: " + timeStamp +
+                            "\nMagic number: " + magicNum +
+                            "\nHash of the previous block:\n" + prevHash +
+                            "\nHash of the block:\n" + getHash() +
+                            "\nBlock was generating for " + generatingTime / 1000.0 + " seconds";
+        }
+    }
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/50/stages/275/implement
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: Congratulations! Continue on <a href="https://hyperskill.org/projects/50/stages/275/implement">JetBrains
+    Academy</a>
+  time: Sat, 10 Oct 2020 13:16:48 UTC
+record: 3

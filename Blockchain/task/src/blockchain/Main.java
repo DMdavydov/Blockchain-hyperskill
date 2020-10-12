@@ -1,75 +1,90 @@
 package blockchain;
 
-import blockchain.util.SerializationUtils;
+import blockchain.user.UserFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
+
     public static void main(String[] args) {
-        int blocksNumber = 5;
-        int zeros = 0;
-        int miners = 10;
-        ParallelExecutor<Miner> parallelExecutor = new ParallelExecutor<>(12, miners);
+        var driver = BlockchainDriver.newDriver();
+        var blockchain = driver.getBlockchain();
+        var userFactory = UserFactory.with(blockchain);
 
-        List<List<String>> messagesList = List.of(
-                List.of(),
-                List.of("Tom: Hey, I'm first!"),
-                List.of("Sarah: It's not fair!",
-                        "Sarah: You always will be first because it is your blockchain!",
-                        "Sarah: Anyway, thank you for this amazing chat."),
-                List.of("Tom: You're welcome :)",
-                        "Nick: Hey Tom, nice chat"),
-                List.of());
-
-        Block cursor = null;
-        for (int i = 0; i < blocksNumber; i++) {
-            Block finalCursor = cursor;
-            int finalZeros = zeros;
-            List<String> messages = messagesList.get(i);
-            Miner miner = parallelExecutor.execute(id -> new Miner(id, finalCursor, finalZeros, messages)::mine);
-
-            cursor = miner.getBlock();
-
-            printBlock(cursor, miner);
-
-            int miningDuration = cursor.getMiningDuration();
-            if (miningDuration < 10) {
-                zeros++;
-                System.out.println("N was increased to " + zeros);
-            } else if (miningDuration > 30) {
-                zeros--;
-                System.out.println("N was decreased by 1");
-            } else {
-                System.out.println("N stays the same");
-            }
-
-            System.out.println();
+        var executor = Executors.newFixedThreadPool(20);
+        for (int i = 0; i < 10; i++) {
+            executor.submit(userFactory.newUser());
         }
+        for (int i = 0; i < 10; i++) {
+            executor.submit(userFactory.newMiner());
+        }
+
+        for (int i = 0; i < 15; i++) {
+            while (blockchain.getLength() < i+1) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignore) {
+
+                }
+            }
+            printBlock(blockchain.getBlock(i));
+            System.out.print(i < 14 ? "\n" : "");
+        }
+
+        executor.shutdownNow();
     }
 
-    private static void printBlock(Block block, Miner miner) {
-        String message = block.getMessage();
-        message = message == null ? "no messages" : System.lineSeparator() + message;
-        System.out.printf("Block:%n" +
-                        "Created by miner # %d%n" +
-                        "Id: %d%n" +
-                        "Timestamp: %d%n" +
-                        "Magic number: %d%n" +
-                        "Hash of the previous block: %n" +
-                        "%s%n" +
-                        "Hash of the block: %n" +
-                        "%s%n" +
-                        "Block data: %s%n" +
-                        "Block was generating for %d seconds%n",
-                miner.getId(), block.getUid(), block.getTimestamp(), block.getMagicNumber(),
-                block.getPreviousHash(), block.getHash(),message, block.getMiningDuration());
+    private static void printBlock(Block block) {
+        System.out.println("Block:");
+        System.out.println("Created by: " + block.getMiner().getName());
+        System.out.println(block.getMiner().getName() + " gets " + block.getMineReward() + " VC");
+        System.out.println("Id: " + block.getId());
+        System.out.println("Timestamp: " + block.getTimestamp());
+        System.out.println("Magic number: " + block.getMagicNum());
+        System.out.println("Hash of the previous block: \n" + block.getPrevBlockHash());
+        System.out.println("Hash of the block: \n" + block.getHash());
+        System.out.println("Block data: " + extractTransactions(block));
+        System.out.printf("Block was generating for %d seconds\n", block.getTimeTookForMiningMs()/1000);
+        System.out.println(nValueStatus(block));
+    }
+
+
+    private static int nValue = 0;
+    private static String nValueStatus(Block block) {
+        long timeTook = block.getTimeTookForMiningMs();
+        int fixedMiningTime = Blockchain.getFixedMiningTimeMs();
+        int acceptableDeviation = Blockchain.getAcceptableDeviationInMiningTimeMs();
+
+        if (timeTook >= (fixedMiningTime - acceptableDeviation)
+            && timeTook <= (fixedMiningTime + acceptableDeviation)) {
+            return "N stays the same";
+        }
+
+        if (timeTook < (fixedMiningTime - acceptableDeviation)) {
+            return "N was increased to " + ++nValue;
+        }
+
+        if (nValue == 0) {
+            return "N stays the same";
+        }
+        nValue--;
+        return "N was decreased by 1";
+    }
+
+    private static String extractTransactions(Block block) {
+        if (block.getTransactions().isEmpty()) {
+            return "\nNo transactions";
+        } else {
+            StringBuilder str = new StringBuilder();
+            block.getTransactions().forEach(
+                    transaction -> str.append("\n")
+                    .append(transaction.getFrom().getName())
+                    .append(" sent ")
+                    .append(transaction.getAmount())
+                    .append(" VC to ")
+                    .append(transaction.getTo().getName())
+            );
+            return str.toString();
+        }
     }
 }
